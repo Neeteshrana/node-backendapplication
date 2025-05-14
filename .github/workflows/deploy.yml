@@ -16,30 +16,30 @@ jobs:
       - name: Stop and remove existing Docker container
         run: |
           echo "🛑 Stopping existing container..."
-          docker stop node-backend || true
-          docker rm node-backend || true
+          sudo docker stop node-backend || true
+          sudo docker rm node-backend || true
 
       - name: Remove existing Docker image
         run: |
           echo "🧹 Removing old image..."
-          docker rmi node-backend-image || true
+          sudo docker rmi node-backend-image || true
 
       - name: Build Docker image
         run: |
           echo "🔨 Building Docker image..."
-          docker build -t node-backend-image .
+          sudo docker build -t node-backend-image .
 
       - name: Run Docker container
         run: |
           echo "🚀 Starting Docker container..."
-          docker run -d --name node-backend -p 3000:3000 node-backend-image
+          sudo docker run -d --name node-backend -p 3000:3000 node-backend-image
 
       - name: Deployment Success 🎉
         if: success()
         run: |
           echo "✅ DEPLOYMENT SUCCESSFUL ✅"
           echo "--------------------------------------------"
-          echo "🌐 App URL: http://<your-server-ip>:3000"
+          echo "🌐 App URL: http://noded.bitedge.app"
           echo "🕒 Time: $(date)"
           echo "📡 Host: $(hostname)"
           echo "--------------------------------------------"
@@ -48,5 +48,5 @@ jobs:
         if: failure()
         run: |
           echo "❌ DEPLOYMENT FAILED ❌"
-          docker logs node-backend || true | tail -n 20 > failure.log
+          sudo docker logs node-backend || true | tail -n 20 > failure.log
           if [ ! -s failure.log ]; then echo "No failure logs found." > failure.log; fi
