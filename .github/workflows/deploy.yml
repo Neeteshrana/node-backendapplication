@@ -1,0 +1,52 @@
+name: Deploy Node Backend using Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Stop and remove existing Docker container
+        run: |
+          echo "🛑 Stopping existing container..."
+          docker stop node-backend || true
+          docker rm node-backend || true
+
+      - name: Remove existing Docker image
+        run: |
+          echo "🧹 Removing old image..."
+          docker rmi node-backend-image || true
+
+      - name: Build Docker image
+        run: |
+          echo "🔨 Building Docker image..."
+          docker build -t node-backend-image .
+
+      - name: Run Docker container
+        run: |
+          echo "🚀 Starting Docker container..."
+          docker run -d --name node-backend -p 3000:3000 node-backend-image
+
+      - name: Deployment Success 🎉
+        if: success()
+        run: |
+          echo "✅ DEPLOYMENT SUCCESSFUL ✅"
+          echo "--------------------------------------------"
+          echo "🌐 App URL: http://<your-server-ip>:3000"
+          echo "🕒 Time: $(date)"
+          echo "📡 Host: $(hostname)"
+          echo "--------------------------------------------"
+
+      - name: Logs on Failure
+        if: failure()
+        run: |
+          echo "❌ DEPLOYMENT FAILED ❌"
+          docker logs node-backend || true | tail -n 20 > failure.log
+          if [ ! -s failure.log ]; then echo "No failure logs found." > failure.log; fi
